@@ -92,16 +92,18 @@ public final class BlockCompatibility {
 
     /**
      * Removes a just-created Rebar block without drops before restoring the replaced Bukkit block.
+     *
+     * @return true only when the custom block is no longer registered afterwards
      */
-    public static void rollbackCustomPlacement(@NotNull Block block, @NotNull ItemStack item) {
+    public static boolean rollbackCustomPlacement(@NotNull Block block, @NotNull ItemStack item) {
         if (!isRebarAvailable()) {
-            return;
+            return true;
         }
 
         try {
-            RebarCompatibility.rollbackPlacement(block, item);
+            return RebarCompatibility.rollbackPlacement(block, item);
         } catch (LinkageError | RuntimeException ignored) {
-            // Best effort rollback; callers only use this after Rebar successfully registered the block.
+            return false;
         }
     }
 }
