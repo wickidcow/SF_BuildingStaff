@@ -247,7 +247,9 @@ public abstract class BuildingStaff extends SlimefunItem implements Staff {
 
     private int countAvailableItems(@NotNull Player player, @NotNull ItemStack target, boolean exactMatch) {
         int count = 0;
-        for (ItemStack itemStack : player.getInventory().getContents()) {
+        // Count only storage slots because removeExactItems consumes from those same slots.
+        // This prevents off-hand/armor contents from increasing the placement allowance without being consumed.
+        for (ItemStack itemStack : player.getInventory().getStorageContents()) {
             if (itemStack == null || itemStack.getType().isAir()) {
                 continue;
             }
