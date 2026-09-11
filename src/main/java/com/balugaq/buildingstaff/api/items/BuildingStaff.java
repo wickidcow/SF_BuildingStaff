@@ -229,8 +229,19 @@ public abstract class BuildingStaff extends SlimefunItem implements Staff {
 
                 boolean registered = BlockCompatibility.isPlacedFromItem(block, eventItem);
                 if (blockPlaceEvent.isCancelled() || !registered) {
-                    if (registered) {
-                        BlockCompatibility.rollbackCustomPlacement(block, eventItem);
+                    if (registered && !BlockCompatibility.rollbackCustomPlacement(block, eventItem)) {
+                        // Never restore a vanilla block over still-registered Rebar state. This can only
+                        // happen if a late listener cancels placement after Rebar registered the block and
+                        // Rebar then vetoes the rollback break. Preserve internal consistency and consume
+                        // the matching item because the custom block remains in the world.
+                        getAddon().getJavaPlugin().getLogger().warning(
+                                "Unable to roll back cancelled Rebar/Pylon placement at "
+                                        + block.getWorld().getName() + " "
+                                        + block.getX() + "," + block.getY() + "," + block.getZ()
+                                        + "; leaving the registered custom block intact."
+                        );
+                        placed++;
+                        continue;
                     }
                     replacedState.update(true, false);
                     continue;
