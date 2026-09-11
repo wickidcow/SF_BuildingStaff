@@ -76,6 +76,10 @@
             <url>https://repo.metamechanists.org/releases/</url>
         </repository>
         <repository>
+            <id>xenondevs</id>
+            <url>https://repo.xenondevs.xyz/releases/</url>
+        </repository>
+        <repository>
             <id>central</id>
             <url>https://repo1.maven.org/maven2/</url>
         </repository>
