@@ -38,13 +38,19 @@ public final class BlockCompatibility {
     /**
      * Gets the item that represents the block for staff placement.
      * Vanilla blocks use a plain material stack. Rebar/Pylon blocks use their pick item.
+     *
+     * <p>When Rebar is installed, compatibility failures are fail-closed. Returning null is safer
+     * than accidentally treating a custom machine as its vanilla backing material.</p>
      */
     public static @Nullable ItemStack getPlacementItem(@NotNull Block block, @NotNull Player player) {
-        if (!isCustomBlock(block)) {
+        if (!isRebarAvailable()) {
             return new ItemStack(block.getType(), 1);
         }
 
         try {
+            if (!RebarCompatibility.isRebarBlock(block)) {
+                return new ItemStack(block.getType(), 1);
+            }
             return RebarCompatibility.getPickItem(block, player);
         } catch (LinkageError | RuntimeException ignored) {
             return null;
@@ -63,7 +69,9 @@ public final class BlockCompatibility {
         try {
             return RebarCompatibility.isSameBlockType(source, candidate);
         } catch (LinkageError | RuntimeException ignored) {
-            return source.getType() == candidate.getType();
+            // Fail closed when Rebar is present. Expanding a strict staff selection is unsafe if
+            // custom block identity cannot be determined reliably.
+            return false;
         }
     }
 
@@ -93,7 +101,7 @@ public final class BlockCompatibility {
         try {
             RebarCompatibility.rollbackPlacement(block, item);
         } catch (LinkageError | RuntimeException ignored) {
-            // Best effort rollback; the caller will still restore the Bukkit block state.
+            // Best effort rollback; callers only use this after Rebar successfully registered the block.
         }
     }
 }
