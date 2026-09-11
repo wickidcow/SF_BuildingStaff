@@ -2,6 +2,7 @@ package com.balugaq.buildingstaff.core.listeners;
 
 import com.balugaq.buildingstaff.api.items.BuildingStaff;
 import com.balugaq.buildingstaff.api.objects.events.PrepareBuildingEvent;
+import com.balugaq.buildingstaff.compat.BlockCompatibility;
 import com.balugaq.buildingstaff.implementation.BuildingStaffPlugin;
 import com.balugaq.buildingstaff.utils.Debug;
 import com.balugaq.buildingstaff.utils.StaffUtil;
@@ -51,7 +52,15 @@ public class PrepareBuildingListener implements Listener {
         if (!player.isOp() && !Slimefun.getProtectionManager().hasPermission(player, lookingAtBlock, Interaction.PLACE_BLOCK)) {
             return;
         }
+
         Material material = lookingAtBlock.getType();
+        boolean customBlock = BlockCompatibility.isCustomBlock(lookingAtBlock);
+        ItemStack placementItem = BlockCompatibility.getPlacementItem(lookingAtBlock, player);
+        if (placementItem == null || placementItem.getType().isAir()) {
+            return;
+        }
+        placementItem.setAmount(1);
+
         int playerHas = 0;
         if (player.getGameMode() == GameMode.CREATIVE) {
             playerHas = 4096;
@@ -61,9 +70,11 @@ public class PrepareBuildingListener implements Listener {
                     continue;
                 }
 
-                if (itemStack.getType() == material) {
-                    int count = itemStack.getAmount();
-                    playerHas += count;
+                boolean matches = customBlock
+                        ? itemStack.isSimilar(placementItem)
+                        : itemStack.getType() == material;
+                if (matches) {
+                    playerHas += itemStack.getAmount();
                 }
 
                 if (playerHas >= limitBlocks) {
@@ -72,7 +83,12 @@ public class PrepareBuildingListener implements Listener {
             }
         }
 
-        Set<Location> showingBlocks = StaffUtil.getBuildingLocations(player, Math.min(limitBlocks, playerHas), buildingStaff.getAxis(player.getInventory().getItemInMainHand()), buildingStaff.isBlockStrict());
+        Set<Location> showingBlocks = StaffUtil.getBuildingLocations(
+                player,
+                Math.min(limitBlocks, playerHas),
+                buildingStaff.getAxis(player.getInventory().getItemInMainHand()),
+                buildingStaff.isBlockStrict()
+        );
         DisplayGroup displayGroup = new DisplayGroup(player.getLocation(), 0.0F, 0.0F);
         for (Location location : showingBlocks) {
             String ls = location.getBlockX() + "_" + location.getBlockY() + "_" + location.getBlockZ();
@@ -81,13 +97,14 @@ public class PrepareBuildingListener implements Listener {
             displayGroup.addDisplay("b" + ls, border.build(displayLocation));
         }
 
-        displayGroup.getDisplays().forEach((name, display) -> {
-            display.setMetadata(BuildingStaffPlugin.getInstance().getName(), new FixedMetadataValue(BuildingStaffPlugin.getInstance(), true));
-        });
-
+        displayGroup.getDisplays().forEach((name, display) ->
+                display.setMetadata(
+                        BuildingStaffPlugin.getInstance().getName(),
+                        new FixedMetadataValue(BuildingStaffPlugin.getInstance(), true)
+                )
+        );
 
         UUID uuid = player.getUniqueId();
-
         BuildingStaffPlugin.getInstance().getDisplayManager().registerDisplayGroup(uuid, displayGroup);
     }
 }
