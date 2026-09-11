@@ -63,11 +63,17 @@ final class RebarCompatibility {
         return blockKey != null && blockKey.equals(rebarBlock.getKey());
     }
 
-    static void rollbackPlacement(@NotNull Block block, @NotNull ItemStack item) {
+    /**
+     * Attempts to remove a just-created Rebar block without drops.
+     *
+     * @return true when the matching Rebar block is no longer registered after the rollback attempt
+     */
+    static boolean rollbackPlacement(@NotNull Block block, @NotNull ItemStack item) {
         if (!isPlacedFromItem(block, item)) {
-            return;
+            return true;
         }
 
         BlockStorage.breakBlock(block, new BlockBreakContext.PluginBreak(block, false, true));
+        return !isPlacedFromItem(block, item);
     }
 }
