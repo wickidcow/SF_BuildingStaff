@@ -12,8 +12,6 @@ import com.balugaq.buildingstaff.implementation.items.BuildingStaff4096;
 import com.balugaq.buildingstaff.implementation.items.BuildingStaff64;
 import com.balugaq.buildingstaff.implementation.items.BuildingStaff9;
 import com.balugaq.buildingstaff.implementation.items.DisplayClearer;
-import com.balugaq.buildingstaff.utils.ItemStackUtil;
-import com.balugaq.buildingstaff.implementation.items.DisplayClearer;
 import com.balugaq.buildingstaff.utils.KeyUtil;
 import com.balugaq.buildingstaff.utils.SlimefunItemUtil;
 import com.balugaq.buildingstaff.utils.compatibility.Converter;
@@ -22,7 +20,6 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
-import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -71,11 +68,11 @@ public class StaffSetup implements IManager {
         ItemStack bronze = Converter.getItem(SlimefunItems.BRONZE_INGOT);
         ItemStack glass = new ItemStack(Material.GLASS);
         ItemStack diamond = new ItemStack(Material.DIAMOND);
-        ItemStack gold_ingot = new ItemStack(Material.GOLD_INGOT);
+        ItemStack goldIngot = new ItemStack(Material.GOLD_INGOT);
 
         mainGroup = new ItemGroup(KeyUtil.newKey("building_staff"), Converter.getItem(
                 Material.BLAZE_ROD,
-                "&a建筑魔杖"
+                "&aBuilding Staff"
         ));
 
         mainGroup.register(plugin);
@@ -85,10 +82,10 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BUILDING_STAFF_9",
                         new ItemStack(Material.IRON_SWORD),
-                        "&a建筑魔杖 | &99格",
-                        "&7右键以放置方块",
-                        "&a最大范围: 9格",
-                        "&a选中平面可由任意方块组成"
+                        "&aBuilding Staff | &99 Blocks",
+                        "&7Right-click to place blocks",
+                        "&aMaximum range: 9 blocks",
+                        "&aSelected plane may contain any block type"
                 ),
                 RecipeType.ENHANCED_CRAFTING_TABLE,
                 new ItemStack[]{
@@ -105,10 +102,10 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BUILDING_STAFF_64",
                         new ItemStack(Material.GOLDEN_SWORD),
-                        "&a建筑魔杖 | &664格",
-                        "&7右键以放置方块",
-                        "&e最大范围: 64格",
-                        "&a选中平面可由任意方块组成"
+                        "&aBuilding Staff | &664 Blocks",
+                        "&7Right-click to place blocks",
+                        "&eMaximum range: 64 blocks",
+                        "&aSelected plane may contain any block type"
                 ),
                 RecipeType.ANCIENT_ALTAR,
                 new ItemStack[]{
@@ -125,11 +122,11 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BUILDING_STAFF_4096",
                         new ItemStack(Material.DIAMOND_SWORD),
-                        "&a建筑魔杖 | &e4096格",
-                        "&7右键以放置方块",
-                        "&c最大范围: 4096格",
-                        "&a选中平面可由任意方块组成",
-                        "&c仅限管理员使用"
+                        "&aBuilding Staff | &e4096 Blocks",
+                        "&7Right-click to place blocks",
+                        "&cMaximum range: 4096 blocks",
+                        "&aSelected plane may contain any block type",
+                        "&cAdmin use only"
                 ),
                 RecipeType.NULL,
                 new ItemStack[]{}
@@ -142,10 +139,10 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BLOCK_STRICT_BUILDING_STAFF_9",
                         new ItemStack(Material.IRON_SWORD),
-                        "&a建筑魔杖 | &99格",
-                        "&7右键以放置方块",
-                        "&a最大范围: 9格",
-                        "&c选中平面只能由一种方块组成"
+                        "&aStrict Building Staff | &99 Blocks",
+                        "&7Right-click to place blocks",
+                        "&aMaximum range: 9 blocks",
+                        "&cSelected plane must contain only one block type"
                 ),
                 RecipeType.ENHANCED_CRAFTING_TABLE,
                 new ItemStack[]{
@@ -162,10 +159,10 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BLOCK_STRICT_BUILDING_STAFF_64",
                         new ItemStack(Material.GOLDEN_SWORD),
-                        "&a建筑魔杖 | &664格",
-                        "&7右键以放置方块",
-                        "&e最大范围: 64格",
-                        "&c选中平面只能由一种方块组成"
+                        "&aStrict Building Staff | &664 Blocks",
+                        "&7Right-click to place blocks",
+                        "&eMaximum range: 64 blocks",
+                        "&cSelected plane must contain only one block type"
                 ),
                 RecipeType.ENHANCED_CRAFTING_TABLE,
                 new ItemStack[]{
@@ -182,11 +179,11 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BLOCK_STRICT_BUILDING_STAFF_4096",
                         new ItemStack(Material.DIAMOND_SWORD),
-                        "&a建筑魔杖 | &e4096格",
-                        "&7右键以放置方块",
-                        "&c最大范围: 4096格",
-                        "&c选中平面只能由一种方块组成",
-                        "&c仅限管理员使用"
+                        "&aStrict Building Staff | &e4096 Blocks",
+                        "&7Right-click to place blocks",
+                        "&cMaximum range: 4096 blocks",
+                        "&cSelected plane must contain only one block type",
+                        "&cAdmin use only"
                 ),
                 RecipeType.NULL,
                 new ItemStack[]{}
@@ -199,10 +196,10 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BREAKING_STAFF_9",
                         new ItemStack(Material.IRON_SWORD),
-                        "&c破坏魔杖 | &99格",
-                        "&7右键以破坏方块",
-                        "&a最大范围: 9格",
-                        "&c选中平面只能由一种方块组成"
+                        "&cBreaking Staff | &99 Blocks",
+                        "&7Right-click to break blocks",
+                        "&aMaximum range: 9 blocks",
+                        "&cSelected plane must contain only one block type"
                 ),
                 RecipeType.ENHANCED_CRAFTING_TABLE,
                 new ItemStack[]{
@@ -219,10 +216,10 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BREAKING_STAFF_64",
                         new ItemStack(Material.GOLDEN_SWORD),
-                        "&c破坏魔杖 | &664格",
-                        "&7右键以破坏方块",
-                        "&e最大范围: 64格",
-                        "&c选中平面只能由一种方块组成"
+                        "&cBreaking Staff | &664 Blocks",
+                        "&7Right-click to break blocks",
+                        "&eMaximum range: 64 blocks",
+                        "&cSelected plane must contain only one block type"
                 ),
                 RecipeType.ENHANCED_CRAFTING_TABLE,
                 new ItemStack[]{
@@ -239,11 +236,11 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BREAKING_STAFF_4096",
                         new ItemStack(Material.DIAMOND_SWORD),
-                        "&c破坏魔杖 | &e4096格",
-                        "&7右键以破坏方块",
-                        "&c最大范围: 4096格",
-                        "&c选中平面只能由一种方块组成",
-                        "&c仅限管理员使用"
+                        "&cBreaking Staff | &e4096 Blocks",
+                        "&7Right-click to break blocks",
+                        "&cMaximum range: 4096 blocks",
+                        "&cSelected plane must contain only one block type",
+                        "&cAdmin use only"
                 ),
                 RecipeType.NULL,
                 new ItemStack[]{}
@@ -256,14 +253,14 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BUILDING_STAFF_DISPLAY_CLEARER",
                         Material.CLAY_BALL,
-                        "&e实体清除器",
-                        "&e清除建筑魔杖残留的全息实体"
+                        "&eDisplay Clearer",
+                        "&eClears holographic entities left by Building Staff"
                 ),
                 RecipeType.ENHANCED_CRAFTING_TABLE,
                 new ItemStack[] {
-                        glass, glass, gold_ingot,
+                        glass, glass, goldIngot,
                         diamond, diamond, glass,
-                        glass, glass, gold_ingot
+                        glass, glass, goldIngot
                 }
         );
 
