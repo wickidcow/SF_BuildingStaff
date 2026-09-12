@@ -1,8 +1,8 @@
 name: BuildingStaff
 main: com.balugaq.buildingstaff.implementation.BuildingStaffPlugin
 depend: [ Slimefun ]
-authors: [ balugaq ]
-website: https://github.com/balugaq/BuildingStaff
+authors: [ balugaq, wickidcow ]
+website: https://github.com/wickidcow/SF_BuildingStaff
 version: ${project.version}
 api-version: 1.20
 commands:
