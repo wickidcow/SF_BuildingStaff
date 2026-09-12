@@ -13,11 +13,11 @@ import org.jetbrains.annotations.NotNull;
 @UtilityClass
 public class ClipboardUtil {
     public static void send(@NotNull Player player, String text) {
-        send(player, "信息: ", text);
+        send(player, "Info: ", text);
     }
 
     public static void send(@NotNull Player player, String display, String text) {
-        send(player, display, "点击复制到剪贴板", text);
+        send(player, display, "Click to copy to clipboard", text);
     }
 
     public static void send(@NotNull Player player, String display, String hover, String text) {

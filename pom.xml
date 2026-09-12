@@ -6,30 +6,33 @@
 
     <groupId>com.balugaq</groupId>
     <artifactId>BuildingStaff</artifactId>
-    <version>v1.0.32</version>
+    <version>1.0.33-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>BuildingStaff</name>
+
     <properties>
-        <java.version>20</java.version>
+        <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <paper.version>26.2.build.121-stable</paper.version>
+        <rebar.version>0.43.0-26.2</rebar.version>
     </properties>
 
     <build>
+        <finalName>SF_BuildingStaff${project.version}</finalName>
         <defaultGoal>clean package</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.14.1</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <release>${maven.compiler.release}</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.34</version>
+                            <version>1.18.46</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -37,13 +40,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
+                        <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
-                        <phase>package</phase>
                     </execution>
                 </executions>
             </plugin>
@@ -73,6 +76,10 @@
             <url>https://repo.metamechanists.org/releases/</url>
         </repository>
         <repository>
+            <id>xenondevs</id>
+            <url>https://repo.xenondevs.xyz/releases/</url>
+        </repository>
+        <repository>
             <id>central</id>
             <url>https://repo1.maven.org/maven2/</url>
         </repository>
@@ -90,10 +97,16 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.20.1-R0.1-SNAPSHOT</version>
+            <version>${paper.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Chinese localization library -->
+        <dependency>
+            <groupId>io.github.pylonmc</groupId>
+            <artifactId>rebar</artifactId>
+            <version>${rebar.version}</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>net.guizhanss</groupId>
             <artifactId>GuizhanLibPlugin</artifactId>
@@ -109,7 +122,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.34</version>
+            <version>1.18.46</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
