@@ -19,7 +19,7 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>SF_BuildingStaff1.0.33</finalName>
+        <finalName>SF_BuildingStaff${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -28,105 +28,33 @@
                 <configuration>
                     <release>${maven.compiler.release}</release>
                     <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
+                        <path><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><version>${lombok.version}</version></path>
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                        </configuration>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId><artifactId>maven-shade-plugin</artifactId><version>3.6.1</version>
+                <executions><execution><goals><goal>shade</goal></goals><phase>package</phase><configuration><createDependencyReducedPom>false</createDependencyReducedPom></configuration></execution></executions>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <excludes>
-                    <exclude>/**/*.zip</exclude>
-                </excludes>
-            </resource>
-        </resources>
+        <resources><resource><directory>src/main/resources</directory><filtering>true</filtering><excludes><exclude>/**/*.zip</exclude></excludes></resource></resources>
     </build>
 
     <repositories>
-        <repository>
-            <id>jitpack</id>
-            <url>https://jitpack.io</url>
-        </repository>
-        <repository>
-            <id>codemc-repo</id>
-            <url>https://repo.codemc.org/repository/maven-public/</url>
-        </repository>
-        <repository>
-            <id>org.metamechanists</id>
-            <url>https://repo.metamechanists.org/releases/</url>
-        </repository>
-        <repository>
-            <id>central</id>
-            <url>https://repo1.maven.org/maven2/</url>
-        </repository>
-        <repository>
-            <id>papermc-repo</id>
-            <url>https://repo.papermc.io/repository/maven-public/</url>
-        </repository>
-        <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
-        </repository>
+        <repository><id>jitpack</id><url>https://jitpack.io</url></repository>
+        <repository><id>codemc-repo</id><url>https://repo.codemc.org/repository/maven-public/</url></repository>
+        <repository><id>org.metamechanists</id><url>https://repo.metamechanists.org/releases/</url></repository>
+        <repository><id>central</id><url>https://repo1.maven.org/maven2/</url></repository>
+        <repository><id>papermc-repo</id><url>https://repo.papermc.io/repository/maven-public/</url></repository>
+        <repository><id>sonatype</id><url>https://oss.sonatype.org/content/groups/public/</url></repository>
     </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>io.papermc.paper</groupId>
-            <artifactId>paper-api</artifactId>
-            <version>${paper.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.guizhanss</groupId>
-            <artifactId>GuizhanLibPlugin</artifactId>
-            <version>1.7.6</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.SlimefunGuguProject</groupId>
-            <artifactId>Slimefun4</artifactId>
-            <version>2024.3</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.metamechanists</groupId>
-            <artifactId>MetaLib</artifactId>
-            <version>46</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.metamechanists</groupId>
-            <artifactId>DisplayModelLib</artifactId>
-            <version>3</version>
-            <scope>compile</scope>
-        </dependency>
+        <dependency><groupId>io.papermc.paper</groupId><artifactId>paper-api</artifactId><version>${paper.version}</version><scope>provided</scope></dependency>
+        <dependency><groupId>net.guizhanss</groupId><artifactId>GuizhanLibPlugin</artifactId><version>1.7.6</version><scope>provided</scope></dependency>
+        <dependency><groupId>com.github.SlimefunGuguProject</groupId><artifactId>Slimefun4</artifactId><version>2024.3</version><scope>provided</scope></dependency>
+        <dependency><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><version>${lombok.version}</version><scope>provided</scope></dependency>
+        <dependency><groupId>org.metamechanists</groupId><artifactId>MetaLib</artifactId><version>46</version><scope>compile</scope></dependency>
+        <dependency><groupId>org.metamechanists</groupId><artifactId>DisplayModelLib</artifactId><version>3</version><scope>compile</scope></dependency>
     </dependencies>
 </project>
