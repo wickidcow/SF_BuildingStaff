@@ -1,0 +1,81 @@
+name: Build BuildingStaff
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  VERSION: "1.0.33"
+  OUTPUT_NAME: "SF_BuildingStaff1.0.33.jar"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out BuildingStaff
+        uses: actions/checkout@v6
+
+      - name: Set up Java 25 compiler
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Build universal JAR on 1.21.11 baseline
+        run: mvn --batch-mode --update-snapshots clean package
+
+      - name: Stage release JAR
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          test -s "target/${OUTPUT_NAME}"
+          cp "target/${OUTPUT_NAME}" "dist/${OUTPUT_NAME}"
+          unzip -tqq "dist/${OUTPUT_NAME}"
+          sha256sum "dist/${OUTPUT_NAME}"
+
+      - name: Verify Java 21 bytecode
+        shell: bash
+        run: |
+          set -euo pipefail
+          MAIN_CLASS=$(unzip -p "dist/${OUTPUT_NAME}" plugin.yml | awk '/^main:/ {print $2; exit}')
+          test -n "$MAIN_CLASS"
+          javap -verbose -classpath "dist/${OUTPUT_NAME}" "$MAIN_CLASS" | grep -F 'major version: 65'
+
+      - name: Verify Paper 26.2 compilation
+        run: mvn --batch-mode --update-snapshots -Dpaper.version=26.2-R0.1-SNAPSHOT -DskipTests clean package
+
+      - name: Verify Paper 26.3 compilation
+        run: mvn --batch-mode --update-snapshots -Dpaper.version=26.3-R0.1-SNAPSHOT -DskipTests clean package
+
+      - name: Upload raw JAR artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.OUTPUT_NAME }}
+          path: dist/${{ env.OUTPUT_NAME }}
+          archive: false
+          if-no-files-found: error
+
+      - name: Publish GitHub release
+        if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then TAG="$GITHUB_REF_NAME"; else TAG="v${VERSION}"; fi
+          JAR="dist/${OUTPUT_NAME}"
+          NOTES="BuildingStaff ${VERSION} adds Paper 26.3 compile validation while keeping a Java 21 universal JAR and Paper 1.21.11 baseline. Paper 26.2 remains the primary production target. The build now emits ${OUTPUT_NAME} directly."
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$JAR" --clobber
+          else
+            gh release create "$TAG" "$JAR" --target "$GITHUB_SHA" --title "SF_BuildingStaff $TAG" --notes "$NOTES"
+          fi
