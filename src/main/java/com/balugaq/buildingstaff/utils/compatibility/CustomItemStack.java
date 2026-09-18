@@ -106,7 +106,7 @@ public class CustomItemStack implements Cloneable {
         return ChatColor.translateAlternateColorCodes('&', Preconditions.checkNotNull(raw, "raw cannot be null"));
     }
 
-    // 委托方法封装
+    // Delegate method wrappers
     public ItemStack getDelegate() {
         return delegate.clone();
     }
