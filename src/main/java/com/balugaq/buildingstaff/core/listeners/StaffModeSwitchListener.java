@@ -4,7 +4,8 @@ import com.balugaq.buildingstaff.api.items.Staff;
 import com.balugaq.buildingstaff.implementation.BuildingStaffPlugin;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import org.bukkit.Axis;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("deprecation")
 public class StaffModeSwitchListener implements Listener {
     @EventHandler
     public void onStaffModeSwitch(@NotNull PlayerSwapHandItemsEvent event) {
@@ -44,20 +44,20 @@ public class StaffModeSwitchListener implements Listener {
                 return;
             }
 
-            List<String> defaultLore = staffLike.getItem().getItemMeta().getLore();
+            List<Component> defaultLore = staffLike.getItem().getItemMeta().lore();
             if (defaultLore == null) {
                 return;
             }
 
-            List<String> lore = new ArrayList<>(defaultLore);
-            lore.add(ChatColor.GOLD + "Axis strict: " + (nextAxis == null ? "None" : nextAxis.name()));
-            meta.setLore(lore);
+            List<Component> lore = new ArrayList<>(defaultLore);
+            lore.add(Component.text("Axis strict: " + (nextAxis == null ? "None" : nextAxis.name()), NamedTextColor.GOLD));
+            meta.lore(lore);
             itemInOffHand.setItemMeta(meta);
 
             player.getInventory().setItemInMainHand(itemInOffHand);
             event.setCancelled(true);
             BuildingStaffPlugin.getInstance().getDisplayManager().killDisplays(player.getUniqueId());
-            player.sendMessage(ChatColor.GOLD + "Axis switched to: " + (nextAxis == null ? "None" : nextAxis.name()));
+            player.sendMessage(Component.text("Axis switched to: " + (nextAxis == null ? "None" : nextAxis.name()), NamedTextColor.GOLD));
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
         }
     }
