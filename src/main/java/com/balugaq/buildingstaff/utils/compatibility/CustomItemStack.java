@@ -49,11 +49,11 @@ public class CustomItemStack implements Cloneable {
                 itemMeta.displayName(colorComponent(name));
             }
             if (lore.length > 0) {
-                List<String> lines = new ArrayList<>();
+                List<Component> lines = new ArrayList<>();
                 for (String line : lore) {
-                    lines.add(color(line));
+                    lines.add(colorComponent(line));
                 }
-                itemMeta.setLore(lines);
+                itemMeta.lore(lines);
             }
         });
     }
@@ -61,14 +61,14 @@ public class CustomItemStack implements Cloneable {
     public CustomItemStack(@NotNull ItemStack itemStack, Color color, @Nullable String name, String @NotNull ... lore) {
         this(itemStack, itemMeta -> {
             if (name != null) {
-                itemMeta.setDisplayName(color(name));
+                itemMeta.displayName(colorComponent(name));
             }
             if (lore.length > 0) {
-                List<String> lines = new ArrayList<>();
+                List<Component> lines = new ArrayList<>();
                 for (String line : lore) {
-                    lines.add(color(line));
+                    lines.add(colorComponent(line));
                 }
-                itemMeta.setLore(lines);
+                itemMeta.lore(lines);
             }
             if (itemMeta instanceof LeatherArmorMeta leatherArmorMeta) {
                 leatherArmorMeta.setColor(color);
