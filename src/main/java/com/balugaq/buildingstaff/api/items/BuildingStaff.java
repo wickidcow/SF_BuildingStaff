@@ -2,7 +2,6 @@ package com.balugaq.buildingstaff.api.items;
 
 import com.balugaq.buildingstaff.utils.StaffUtil;
 import com.balugaq.buildingstaff.utils.WorldUtils;
-import com.destroystokyo.paper.MaterialTags;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
@@ -17,6 +16,7 @@ import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
