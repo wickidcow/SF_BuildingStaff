@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 public class CustomItemStack implements Cloneable {
     private static final LegacyComponentSerializer LEGACY_AMPERSAND = LegacyComponentSerializer.builder().character('&').hexColors().build();
     private static final LegacyComponentSerializer LEGACY_SECTION = LegacyComponentSerializer.legacySection();
-    private final ItemStack delegate;
+    private ItemStack delegate;
 
     public CustomItemStack(@NotNull ItemStack item) {
         this.delegate = item.clone();
@@ -101,8 +101,7 @@ public class CustomItemStack implements Cloneable {
     }
 
     public CustomItemStack(@NotNull ItemStack itemStack, @NotNull Material material) {
-        this.delegate = itemStack.clone();
-        this.delegate.setType(material);
+        this.delegate = itemStack.withType(material);
     }
 
     public static @NotNull String color(@NotNull String raw) {
@@ -123,7 +122,7 @@ public class CustomItemStack implements Cloneable {
     }
 
     public void setType(Material material) {
-        delegate.setType(material);
+        delegate = delegate.withType(material);
     }
 
     public int getAmount() {
@@ -175,7 +174,16 @@ public class CustomItemStack implements Cloneable {
     }
 
     public @NotNull CustomItemStack setCustomModelData(@Range(from = 0, to = Integer.MAX_VALUE) int data) {
-        return editItemMeta(meta -> meta.setCustomModelData(data == 0 ? null : data));
+        return editItemMeta(meta -> {
+            if (data == 0) {
+                meta.setCustomModelDataComponent(null);
+                return;
+            }
+
+            var component = meta.getCustomModelDataComponent();
+            component.setFloats(List.of((float) data));
+            meta.setCustomModelDataComponent(component);
+        });
     }
 
     public @NotNull CustomItemStack clone() {
