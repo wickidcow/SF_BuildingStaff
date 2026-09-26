@@ -1,7 +1,8 @@
 package com.balugaq.buildingstaff.utils.compatibility;
 
 import com.google.common.base.Preconditions;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
@@ -20,6 +21,8 @@ import java.util.function.Consumer;
 
 @ApiStatus.Experimental
 public class CustomItemStack implements Cloneable {
+    private static final LegacyComponentSerializer LEGACY_AMPERSAND = LegacyComponentSerializer.builder().character('&').hexColors().build();
+    private static final LegacyComponentSerializer LEGACY_SECTION = LegacyComponentSerializer.legacySection();
     private final ItemStack delegate;
 
     public CustomItemStack(@NotNull ItemStack item) {
@@ -43,7 +46,7 @@ public class CustomItemStack implements Cloneable {
     public CustomItemStack(@NotNull ItemStack itemStack, @Nullable String name, @NotNull String @NotNull ... lore) {
         this(itemStack, itemMeta -> {
             if (name != null) {
-                itemMeta.setDisplayName(color(name));
+                itemMeta.displayName(colorComponent(name));
             }
             if (lore.length > 0) {
                 List<String> lines = new ArrayList<>();
@@ -103,7 +106,11 @@ public class CustomItemStack implements Cloneable {
     }
 
     public static @NotNull String color(@NotNull String raw) {
-        return ChatColor.translateAlternateColorCodes('&', Preconditions.checkNotNull(raw, "raw cannot be null"));
+        return LEGACY_SECTION.serialize(colorComponent(raw));
+    }
+
+    public static @NotNull Component colorComponent(@NotNull String raw) {
+        return LEGACY_AMPERSAND.deserialize(Preconditions.checkNotNull(raw, "raw cannot be null"));
     }
 
     // Delegate method wrappers
