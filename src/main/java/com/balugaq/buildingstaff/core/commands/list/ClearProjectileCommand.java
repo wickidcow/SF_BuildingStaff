@@ -2,11 +2,12 @@ package com.balugaq.buildingstaff.core.commands.list;
 
 import com.balugaq.buildingstaff.core.commands.SubCommand;
 import com.balugaq.buildingstaff.implementation.BuildingStaffPlugin;
+import com.balugaq.buildingstaff.utils.KeyUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
-import org.bukkit.metadata.MetadataValue;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -43,8 +44,7 @@ public class ClearProjectileCommand extends SubCommand {
         if (sender instanceof Player player) {
             player.getWorld().getEntities().forEach(entity -> {
                 if (entity instanceof Display display) {
-                    List<MetadataValue> metadata = display.getMetadata(BuildingStaffPlugin.getInstance().getName());
-                    if (!metadata.isEmpty() && metadata.get(0).asBoolean()) {
+                    if (display.getPersistentDataContainer().has(KeyUtil.DISPLAY_PROJECTION, PersistentDataType.BYTE)) {
                         display.remove();
                     }
                 }
