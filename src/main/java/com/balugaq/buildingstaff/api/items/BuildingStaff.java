@@ -176,7 +176,7 @@ public abstract class BuildingStaff extends SlimefunItem implements Staff {
 
     public static boolean copyStateAble(@NotNull Material material) {
         return // Items that be allowed to copy state
-                MaterialTags.FENCE_GATES.isTagged(material)
+                Tag.FENCE_GATES.isTagged(material)
                         || material.name().endsWith("_SLAB")
                         || material.name().endsWith("_STAIRS")
                         || material.name().endsWith("_TRAPDOOR")
@@ -196,7 +196,7 @@ public abstract class BuildingStaff extends SlimefunItem implements Staff {
 
     public static boolean isDisabledMaterial(@NotNull Material material) {
         if (// Items that can store items
-                MaterialTags.SHULKER_BOXES.isTagged(material)
+                Tag.SHULKER_BOXES.isTagged(material)
                         || (material.name().endsWith("CHEST") && material != Material.ENDER_CHEST)
                         || material == Material.BARREL
                         || material == Material.LECTERN
@@ -209,8 +209,8 @@ public abstract class BuildingStaff extends SlimefunItem implements Staff {
                         || material == Material.SUSPICIOUS_GRAVEL
 
                         // Items that will take two blocks
-                        || MaterialTags.BEDS.isTagged(material)
-                        || MaterialTags.DOORS.isTagged(material)
+                        || Tag.BEDS.isTagged(material)
+                        || Tag.DOORS.isTagged(material)
                         || material == Material.TALL_GRASS
                         || material == Material.LARGE_FERN
                         || material == Material.TALL_SEAGRASS
@@ -292,7 +292,7 @@ public abstract class BuildingStaff extends SlimefunItem implements Staff {
                         || material == Material.FLOWER_POT
                         || material == Material.DECORATED_POT
                         || material == Material.CHISELED_BOOKSHELF
-                        || MaterialTags.SIGNS.isTagged(material)
+                        || Tag.SIGNS.isTagged(material)
                         || material == materialValueOf("CRAFTER")
 
                         // Items that have different types
