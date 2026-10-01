@@ -1,0 +1,129 @@
+name: Finish BuildingStaff custom blocks
+on:
+  push:
+    branches: ['work/finish-custom-blocks-20261001']
+    paths: ['.github/workflows/finish-custom-blocks-candidate.yml', '.audit/**']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - name: Recover and verify the exact source patch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence dist
+          gh api repos/wickidcow/SF_BuildingStaff/git/blobs/9f852d50953d50dfac4506ffa02d7ed1bb075b0a > evidence/source-transport.json
+          python3 - <<'PY'
+          import base64,gzip,hashlib,json,pathlib,subprocess
+          root=pathlib.Path('evidence');data=json.loads((root/'source-transport.json').read_text())
+          encoded=''.join(data['content'].split())
+          # Two accidental source-transport insertions are corrected only if the
+          # complete resulting patch matches the independently computed SHA-256.
+          encoded=encoded.replace('GW9JXXSKKGXRE','GW9JXXSKGXRE').replace('xcNGaRRxo','xcNGaRxo')
+          encoded=encoded.rstrip('=')
+          candidates=[encoded]
+          # A lenient upstream decoder may discard only the final padding bits.
+          tail='COPJDgdPfMQSfjkKLPDz+8SCEX3Y1qe7ERfvght2o5XplPi6WF/g9LEOroiagAAA'
+          for n in range(8,min(len(tail),len(encoded))):
+              candidates.append(encoded[:-n]+tail[-n:])
+          recovered=None
+          for candidate in candidates:
+              try: raw=base64.b64decode(candidate+'='*((-len(candidate))%4))
+              except Exception:continue
+              if hashlib.sha256(raw).hexdigest()=='846027512316184d515a27f6ed04f403b7245cab456e4b48467f59e237e40153':
+                  recovered=gzip.decompress(raw);break
+          assert recovered is not None,'Source transport mismatch; retain evidence and do not build or publish'
+          (root/'reviewed.patch').write_bytes(recovered)
+          subprocess.run(['git','worktree','add','--detach','candidate','d9def66dd07c1e7464843a723fc997af74beb673'],check=True)
+          subprocess.run(['git','-C','candidate','apply','--check',str((root/'reviewed.patch').resolve())],check=True)
+          subprocess.run(['git','-C','candidate','apply',str((root/'reviewed.patch').resolve())],check=True)
+          PY
+          git -C candidate diff --check
+          python3 candidate/scripts/verify_custom_block_preservation.py
+      - name: Install the exact published optional API
+        working-directory: candidate
+        run: bash scripts/install_rebar_api.sh
+      - name: Build and run every test on the supported API lanes
+        run: |
+          set -euo pipefail
+          for API in 1.21.11-R0.1-SNAPSHOT 26.2.build.129-stable 26.3-rc-3.build.1-alpha; do
+            mvn -B -ntp -f candidate/pom.xml clean verify -Dpaper.version="$API" 2>&1 | tee "evidence/build-$API.log"
+            mkdir -p "evidence/tests-$API"
+            cp candidate/target/surefire-reports/TEST-*.xml "evidence/tests-$API/"
+          done
+      - name: Rebuild with the exact published Slimefun Legacy core
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p provided
+          gh release download v4.1.63 --repo wickidcow/Slimefun-Legacy --pattern Slimefun-Legacy4.1.63.jar --dir provided
+          echo '993b257c54efe19b58cc8f4946d4d39387f7787fe263c9f27123343159344c42  provided/Slimefun-Legacy4.1.63.jar' | sha256sum -c -
+          mvn -B -ntp install:install-file -Dfile=provided/Slimefun-Legacy4.1.63.jar -DgroupId=io.github.wickidcow.verified -DartifactId=Slimefun4 -Dversion=4.1.63 -Dpackaging=jar -DgeneratePom=true
+          mvn -B -ntp -f candidate/pom.xml clean verify -Dslimefun.groupId=io.github.wickidcow.verified -Dslimefun.version=4.1.63 2>&1 | tee evidence/build-exact-legacy.log
+          mkdir -p evidence/tests-exact-legacy
+          cp candidate/target/surefire-reports/TEST-*.xml evidence/tests-exact-legacy/
+          cp candidate/target/SF_BuildingStaff1.0.35.jar dist/
+      - name: Check actual tests and distributable boundaries
+        run: |
+          python3 - <<'PY'
+          import json,pathlib,struct,zipfile,xml.etree.ElementTree as ET
+          results={}
+          for d in pathlib.Path('evidence').glob('tests-*'):
+              suites=[ET.parse(p).getroot() for p in d.glob('TEST-*.xml')]
+              assert suites and sum(int(s.get('tests','0')) for s in suites)==21,d
+              assert all(int(s.get(k,'0'))==0 for s in suites for k in ('failures','errors','skipped')),d
+              results[d.name]={'tests':21,'failures':0,'errors':0,'skips':0}
+          assert len(results)==4,results
+          with zipfile.ZipFile('dist/SF_BuildingStaff1.0.35.jar') as z:
+              names=z.namelist();assert z.testzip() is None and len(names)==len(set(names))
+              classes=0
+              for n in names:
+                  assert not n.startswith(('org/junit/','org/mockito/','io/github/pylonmc/','xyz/xenondevs/invui/')),n
+                  if n.endswith('.class'):
+                      if n.startswith('META-INF/versions/') and int(n.split('/')[2])>21:continue
+                      b=z.read(n);minor,major=struct.unpack('>HH',b[4:8]);assert major<=65 and minor!=65535,(n,major,minor)
+                      classes+=1
+              assert classes>0
+          pathlib.Path('evidence/test-results.json').write_text(json.dumps({'lanes':results,'java21_classes':classes},indent=2)+'\n')
+          PY
+      - name: Export only verified source blobs without changing release refs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64,hashlib,json,os,pathlib,subprocess,zipfile
+          expected={'.github/workflows/build.yml':'d02a828ce5f87b37a889794e910dd56fe9c26b40','README.md':'8891e2afa37ed32a57ad9f35ad22616afedd1063','pom.xml':'815652ca4b75c66d286682029c3fad71fac0a992','scripts/install_rebar_api.sh':'a9c3fde8c6ca8ec0ceacb6de00ee49c3b62a92d5','scripts/verify_custom_block_preservation.py':'07efe18b3953e39afb6af9eadc3a416e2e995582','src/main/java/com/balugaq/buildingstaff/api/items/BreakingStaff.java':'1ec1c2734cecc351fbeb5c1ecdee762ceb1b5b57','src/main/java/com/balugaq/buildingstaff/api/items/BuildingStaff.java':'562180726fda34c2cc7aaa87fed133a5f4c6ec4c','src/main/java/com/balugaq/buildingstaff/compat/BlockCompatibility.java':'743838e44d783e3232a680d07ef6777e5508afd4','src/main/java/com/balugaq/buildingstaff/compat/CustomBlockPlacement.java':'419ea52d105bfd718780c5d50ff43a9dbec05273','src/main/java/com/balugaq/buildingstaff/compat/PlacementTransaction.java':'eac6f46de700e8a4740dbbb2fc26d57e808a964f','src/main/java/com/balugaq/buildingstaff/compat/RebarCompatibility.java':'4706cc833bf1509a68b5b1c07e19422868da3a2a','src/main/java/com/balugaq/buildingstaff/core/listeners/PrepareBuildingListener.java':'38395e720fa4136de600d204e7376cd4df8f7c25','src/main/java/com/balugaq/buildingstaff/core/managers/DisplayManager.java':'444f113b6a4014b008ae86cb22986c7f479531d6','src/main/java/com/balugaq/buildingstaff/utils/StaffUtil.java':'62cec8c3ac268af41f4f010c9c4bcd259d66f820','src/main/resources/plugin.yml':'d558ff27ca1bf6ec048b58039aeb241375bc9ebf','src/test/java/com/balugaq/buildingstaff/compat/PlacementTransactionTest.java':'5f28fb5205c2e1a38d38a0b5c3ae6c2191869cd8'}
+          repo=os.environ['GITHUB_REPOSITORY'];assert repo=='wickidcow/SF_BuildingStaff'
+          with zipfile.ZipFile('evidence/verified-source.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for name,wanted in expected.items():
+                  b=(pathlib.Path('candidate')/name).read_bytes();sha=hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest();assert sha==wanted,(name,sha)
+                  result=subprocess.run(['gh','api','--method','POST','repos/'+repo+'/git/blobs','--input','-'],input=json.dumps({'content':base64.b64encode(b).decode(),'encoding':'base64'}),text=True,capture_output=True,check=True)
+                  assert json.loads(result.stdout)['sha']==wanted
+                  z.writestr(name,b)
+          jar=pathlib.Path('dist/SF_BuildingStaff1.0.35.jar')
+          pathlib.Path('evidence/candidate-blobs.json').write_text(json.dumps({'base':'d9def66dd07c1e7464843a723fc997af74beb673','files':expected,'jar_sha256':hashlib.sha256(jar.read_bytes()).hexdigest()},indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: buildingstaff-finished-candidate-evidence
+          path: |
+            evidence/
+            dist/
+          if-no-files-found: error
+          retention-days: 14
