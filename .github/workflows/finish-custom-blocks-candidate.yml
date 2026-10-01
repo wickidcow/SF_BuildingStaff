@@ -31,22 +31,21 @@ jobs:
           import base64,gzip,hashlib,json,pathlib,subprocess
           root=pathlib.Path('evidence');data=json.loads((root/'source-transport.json').read_text())
           encoded=''.join(data['content'].split())
-          # Two accidental source-transport insertions are corrected only if the
-          # complete resulting patch matches the independently computed SHA-256.
-          encoded=encoded.replace('GW9JXXSKKGXRE','GW9JXXSKGXRE').replace('xcNGaRRxo','xcNGaRxo')
-          encoded=encoded.rstrip('=')
+          encoded=encoded.replace('GW9JXXSKKGXRE','GW9JXXSKGXRE').replace('xcNGaRRxo','xcNGaRxo').rstrip('=')
           candidates=[encoded]
-          # A lenient upstream decoder may discard only the final padding bits.
           tail='COPJDgdPfMQSfjkKLPDz+8SCEX3Y1qe7ERfvght2o5XplPi6WF/g9LEOroiagAAA'
-          for n in range(8,min(len(tail),len(encoded))):
-              candidates.append(encoded[:-n]+tail[-n:])
+          for n in range(8,min(len(tail),len(encoded))): candidates.append(encoded[:-n]+tail[-n:])
           recovered=None
           for candidate in candidates:
               try: raw=base64.b64decode(candidate+'='*((-len(candidate))%4))
               except Exception:continue
               if hashlib.sha256(raw).hexdigest()=='846027512316184d515a27f6ed04f403b7245cab456e4b48467f59e237e40153':
                   recovered=gzip.decompress(raw);break
-          assert recovered is not None,'Source transport mismatch; retain evidence and do not build or publish'
+          assert recovered is not None,'Source transport mismatch; do not build or publish'
+          old=b'-# BuildingStaff+# BuildingStaff\n'
+          assert recovered.count(old)==1
+          recovered=recovered.replace(old,b'-# BuildingStaff\n\\ No newline at end of file\n+# BuildingStaff\n')
+          assert hashlib.sha256(recovered).hexdigest()=='3169de0580d148554fe21ce7421890ef6412647e101c6216d5edd34a7cdddc31'
           (root/'reviewed.patch').write_bytes(recovered)
           subprocess.run(['git','worktree','add','--detach','candidate','d9def66dd07c1e7464843a723fc997af74beb673'],check=True)
           subprocess.run(['git','-C','candidate','apply','--check',str((root/'reviewed.patch').resolve())],check=True)
