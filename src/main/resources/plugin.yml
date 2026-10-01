@@ -1,6 +1,7 @@
 name: BuildingStaff
 main: com.balugaq.buildingstaff.implementation.BuildingStaffPlugin
 depend: [ Slimefun ]
+softdepend: [ Rebar, Pylon ]
 authors: [ balugaq ]
 website: https://github.com/balugaq/BuildingStaff
 version: ${project.version}

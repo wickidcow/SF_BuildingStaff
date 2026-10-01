@@ -12,8 +12,8 @@ permissions:
   contents: write
 
 env:
-  VERSION: "1.0.34"
-  OUTPUT_NAME: "SF_BuildingStaff1.0.34.jar"
+  VERSION: "1.0.35"
+  OUTPUT_NAME: "SF_BuildingStaff1.0.35.jar"
 
 jobs:
   build:
@@ -29,8 +29,14 @@ jobs:
           java-version: '25'
           cache: maven
 
+      - name: Check retained item and lifecycle contracts
+        run: python3 scripts/verify_custom_block_preservation.py
+
+      - name: Install verified optional Rebar compile API
+        run: bash scripts/install_rebar_api.sh
+
       - name: Build universal JAR on 1.21.11 baseline
-        run: mvn --batch-mode --update-snapshots clean package
+        run: mvn --batch-mode --update-snapshots clean verify
 
       - name: Stage release JAR
         shell: bash
@@ -51,10 +57,10 @@ jobs:
           javap -verbose -classpath "dist/${OUTPUT_NAME}" "$MAIN_CLASS" | grep -F 'major version: 65'
 
       - name: Verify Paper 26.2 compilation
-        run: mvn --batch-mode --update-snapshots "-Dpaper.version=[26.2.build,26.3)" -DskipTests clean package
+        run: mvn --batch-mode --update-snapshots "-Dpaper.version=[26.2.build,26.3)" clean verify
 
       - name: Verify Paper 26.3 alpha compilation
-        run: mvn --batch-mode --update-snapshots -Dpaper.version=26.3-rc-3.build.1-alpha -DskipTests clean package
+        run: mvn --batch-mode --update-snapshots -Dpaper.version=26.3-rc-3.build.1-alpha clean verify
 
       - name: Upload raw JAR artifact
         uses: actions/upload-artifact@v7
@@ -73,7 +79,7 @@ jobs:
           set -euo pipefail
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then TAG="$GITHUB_REF_NAME"; else TAG="v${VERSION}"; fi
           JAR="dist/${OUTPUT_NAME}"
-          NOTES="BuildingStaff ${VERSION} restores the upstream EN-4 English wording across staff names, lore, axis-mode messages, clipboard prompts, and runtime logs while preserving the fork's newer compatibility work and Display Clearer feature. Item IDs, recipes, and gameplay behavior are unchanged. The universal Java 21 JAR keeps the Paper 1.21.11 baseline with Paper 26.2 and 26.3 compile validation. Release artifact: ${OUTPUT_NAME}."
+          NOTES="BuildingStaff ${VERSION} adds optional Rebar/Pylon exact-item placement and breaking, preserves normal provider/protection events, and reserves payment before custom placement callbacks. Verified rollback precedes refunds; failed rollback never overwrites registered custom blocks. Existing Slimefun IDs, recipes, vanilla placement and projection data are retained. The universal Java 21 JAR keeps the Paper 1.21.11 baseline. Rebar/Pylon require their own supported server version and are never bundled. Release artifact: ${OUTPUT_NAME}."
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "$JAR" --clobber
           else

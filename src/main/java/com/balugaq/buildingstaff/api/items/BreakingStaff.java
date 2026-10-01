@@ -1,6 +1,8 @@
 package com.balugaq.buildingstaff.api.items;
 
 import com.balugaq.buildingstaff.utils.StaffUtil;
+import com.balugaq.buildingstaff.compat.BlockCompatibility;
+import com.balugaq.buildingstaff.compat.CustomBlockPlacement;
 import com.destroystokyo.paper.MaterialTags;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -90,7 +92,7 @@ public abstract class BreakingStaff extends SlimefunItem implements Staff {
             }
 
             Material material = lookingAtBlock.getType();
-            if (isDisabledMaterial(material)) {
+            if (isDisabledMaterial(material) && !BlockCompatibility.isCustomBlock(lookingAtBlock)) {
                 return;
             }
 
@@ -129,6 +131,11 @@ public abstract class BreakingStaff extends SlimefunItem implements Staff {
             Set<BlockBreakEvent> locationsToBreak = new HashSet<>();
             for (Location location : result) {
                 if (!Slimefun.getProtectionManager().hasPermission(player, location, Interaction.BREAK_BLOCK)) {
+                    continue;
+                }
+
+                if (BlockCompatibility.isCustomBlock(location.getBlock())) {
+                    CustomBlockPlacement.breakCustom(getAddon().getJavaPlugin(), player, location.getBlock());
                     continue;
                 }
 

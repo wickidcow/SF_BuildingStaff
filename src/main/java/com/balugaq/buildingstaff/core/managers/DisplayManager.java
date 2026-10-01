@@ -5,6 +5,7 @@ import com.balugaq.buildingstaff.api.items.BreakingStaff;
 import com.balugaq.buildingstaff.api.items.BuildingStaff;
 import com.balugaq.buildingstaff.api.objects.events.PrepareBreakingEvent;
 import com.balugaq.buildingstaff.api.objects.events.PrepareBuildingEvent;
+import com.balugaq.buildingstaff.compat.BlockCompatibility;
 import com.balugaq.buildingstaff.utils.Debug;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import lombok.Getter;
@@ -69,7 +70,7 @@ public class DisplayManager implements IManager {
             }
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player.getGameMode() == GameMode.SPECTATOR) {
-                    return;
+                    continue;
                 }
                 UUID uuid = player.getUniqueId();
                 Block block = player.getTargetBlockExact(6, FluidCollisionMode.NEVER);
@@ -99,7 +100,9 @@ public class DisplayManager implements IManager {
                             continue;
                         }
 
-                        if (buildingStaff.isDisabledMaterial(block.getType())) {
+                        // Rebar/Pylon blocks own their custom placement lifecycle and may use a
+                        // backing material that BuildingStaff normally rejects for vanilla blocks.
+                        if (!BlockCompatibility.isCustomBlock(block) && buildingStaff.isDisabledMaterial(block.getType())) {
                             continue;
                         }
 

@@ -1,5 +1,6 @@
 package com.balugaq.buildingstaff.utils;
 
+import com.balugaq.buildingstaff.compat.BlockCompatibility;
 import org.bukkit.Axis;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
@@ -32,7 +33,6 @@ public class StaffUtil {
         validFaces.add(BlockFace.UP);
         validFaces.add(BlockFace.DOWN);
     }
-
 
     public static @NotNull Set<Location> getBuildingLocations(@NotNull Player player, int limitBlocks, Axis onlyAxis, boolean blockStrict) {
         if (limitBlocks <= 0) {
@@ -89,7 +89,6 @@ public class StaffUtil {
             }
         }
 
-        // sort by shortest distance
         Set<Location> locations = new HashSet<>(distances.keySet());
         List<Location> sortedLocations = locations.stream().sorted(Comparator.comparingDouble(distances::get)).limit(limitBlocks).toList();
 
@@ -159,7 +158,7 @@ public class StaffUtil {
 
                 for (BlockFace face : faces) {
                     Block block = currentBlock.getRelative(face);
-                    if (!blockStrict || block.getType() == type) {
+                    if (!blockStrict || BlockCompatibility.isSameBlockType(lookingBlock, block)) {
                         Location location = block.getLocation();
                         if (!locations.contains(location)) {
                             if (checkOutward) {

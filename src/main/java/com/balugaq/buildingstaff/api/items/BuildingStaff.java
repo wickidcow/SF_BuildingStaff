@@ -1,6 +1,8 @@
 package com.balugaq.buildingstaff.api.items;
 
 import com.balugaq.buildingstaff.utils.StaffUtil;
+import com.balugaq.buildingstaff.compat.BlockCompatibility;
+import com.balugaq.buildingstaff.compat.CustomBlockPlacement;
 import com.balugaq.buildingstaff.utils.WorldUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -82,6 +84,28 @@ public abstract class BuildingStaff extends SlimefunItem implements Staff {
             Block lookingAtBlock = player.getTargetBlockExact(6, FluidCollisionMode.NEVER);
             if (lookingAtBlock == null || lookingAtBlock.getType() == Material.AIR) {
                 return;
+            }
+
+            if (BlockCompatibility.isRebarAvailable()) {
+                ItemStack placement = BlockCompatibility.getPlacementItem(lookingAtBlock, player);
+                if (placement == null) return; // Unknown provider state must never fall through to vanilla.
+                if (BlockCompatibility.isCustomBlock(lookingAtBlock)) {
+                    BlockFace face = player.getTargetBlockFace(6, FluidCollisionMode.NEVER);
+                    if (face == null || !placement.getType().isBlock()
+                            || placement.getType() != lookingAtBlock.getType()) return;
+                    int available = player.getGameMode() == GameMode.CREATIVE ? limitBlocks
+                            : CustomBlockPlacement.countItems(player.getInventory(), placement, limitBlocks);
+                    Set<Location> targets = StaffUtil.getBuildingLocations(player, Math.min(limitBlocks, available),
+                            getAxis(player.getInventory().getItemInMainHand()), blockStrict);
+                    ItemStack heldStaff = player.getInventory().getItemInMainHand().clone();
+                    Bukkit.getScheduler().runTaskLater(getAddon().getJavaPlugin(), () -> {
+                        if (!player.isOnline() || !heldStaff.isSimilar(player.getInventory().getItemInMainHand())
+                                || isDisabledIn(player.getWorld()) || (opOnly && !player.isOp())) return;
+                        CustomBlockPlacement.placeBatch(getAddon().getJavaPlugin(), player, targets,
+                                getBlockFaceAsCartesian(face), placement, limitBlocks);
+                    }, 1L);
+                    return;
+                }
             }
 
             Material material = lookingAtBlock.getType();
