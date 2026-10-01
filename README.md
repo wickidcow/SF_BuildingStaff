@@ -1,50 +1,24 @@
-# SF_BuildingStaff
+# BuildingStaff
 
-Building Staff for Slimefun Legacy, maintained for modern Paper servers with optional Rebar/Pylon compatibility.
+## Optional Rebar/Pylon integration (1.0.35)
 
-## Compatibility
+The same Java 21 plugin still runs on Minecraft 1.21.11 without either provider.
+Rebar and Pylon remain optional and require a server version supported by their
+own releases. The compiled provider baseline is Rebar 0.43.0-26.2.
 
-- **Slimefun Legacy:** required
-- **Paper:** 26.2 target
-- **Java:** 25
-- **Rebar:** optional, tested against `0.43.0-26.2`
-- **Pylon:** optional; supported through Rebar's custom block lifecycle
+Custom blocks are selected by provider identity, not just backing material. The
+staff uses their exact pick item, including portable tank data, and charges only
+matching storage inventory slots. Payment is reserved before provider callbacks.
+Protection, research, placement, break and custom-drop events remain active.
+A rejected placement is refunded only after confirmed rollback; a refused or
+ambiguous rollback leaves the registered block intact and logs its location for
+manual recovery rather than overwriting metadata or risking duplicate items.
 
-BuildingStaff continues to work normally when Rebar and Pylon are not installed.
+Normal Slimefun item IDs, recipes, axis/projection data and vanilla placement are
+retained. Provider classes are not shaded. This integration uses the existing
+synchronous Bukkit lifecycle; it is not a Folia region-safety guarantee.
 
-## Rebar / Pylon support
-
-When Rebar is available, BuildingStaff treats custom blocks as custom blocks instead of reducing them to their vanilla backing material.
-
-### Building Staff
-
-- Uses the Rebar/Pylon block's real pick item, including persistent item data.
-- Preserves Rebar research/use checks and block placement hooks.
-- Fires a normal `BlockPlaceEvent` with the physical backing block already present, matching Rebar's expected placement ordering.
-- Consumes the exact matching custom item rather than an ordinary vanilla item with the same material.
-- Keeps different Rebar/Pylon block types separate even when they share the same vanilla backing material.
-- Supports stateful pick items such as Pylon Portable Fluid Tanks without stripping their stored state.
-- Fails closed if Rebar compatibility cannot safely identify or place a custom block.
-
-### Breaking Staff
-
-Breaking Staff continues to use the standard `BlockBreakEvent` lifecycle. Rebar handles its custom block cleanup and drops through that event before BuildingStaff clears the physical backing block. This preserves Rebar/Pylon machine inventories, special drops, and associated display entities.
-
-### Projection preview
-
-The placement preview understands Rebar/Pylon targets and counts the exact custom placement item rather than ordinary items sharing the same material.
-
-## Safety notes
-
-- Rebar and Pylon are soft dependencies, not required dependencies.
-- Strict-mode surface matching compares Rebar block identity, not just Bukkit `Material`.
-- Protection plugins still receive the normal Bukkit placement/break events used by the staff.
-- Cancelled custom placements are rolled back through Rebar. If Rebar vetoes that rollback, BuildingStaff preserves the registered custom block rather than restoring a vanilla block over live Rebar metadata.
-
-## Build
-
-```bash
-mvn clean package
-```
-
-The generated plugin JAR is named `SF_BuildingStaff<version>.jar`.
+For source builds, run `bash scripts/install_rebar_api.sh` before `mvn clean verify`.
+This checksum-verifies a published compile-only API; it does not install a server
+plugin. The test suite covers transaction ordering with explicit doubles; real
+provider/server results must be recorded separately before publication.

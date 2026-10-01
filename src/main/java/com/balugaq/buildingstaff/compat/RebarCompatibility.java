@@ -4,76 +4,39 @@ import io.github.pylonmc.rebar.block.BlockStorage;
 import io.github.pylonmc.rebar.block.RebarBlock;
 import io.github.pylonmc.rebar.block.context.BlockBreakContext;
 import io.github.pylonmc.rebar.item.RebarItem;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-/**
- * Typed Rebar bridge. This class is only touched when the Rebar plugin is enabled.
- * Pylon is built on Rebar, so its custom blocks flow through the same lifecycle.
- */
+/** Typed provider calls are resolved only while Rebar is enabled. */
 final class RebarCompatibility {
-    private RebarCompatibility() {
+    private RebarCompatibility() {}
+    static boolean isRebarBlock(Block block) { return BlockStorage.get(block)!=null; }
+    static Object token(Block block) { return BlockStorage.get(block); }
+    static ItemStack getPickItem(Block block,Player player) {
+        RebarBlock value=BlockStorage.get(block);
+        if (value==null) return null;
+        ItemStack picked=value.getPickItem(player);
+        if (picked==null) return null;
+        ItemStack result=picked.clone();result.setAmount(1);return result;
     }
-
-    static boolean isRebarBlock(@NotNull Block block) {
-        return BlockStorage.isRebarBlock(block);
+    static boolean isSameBlockType(Block source,Block candidate) {
+        RebarBlock left=BlockStorage.get(source),right=BlockStorage.get(candidate);
+        if (left==null || right==null) return left==null && right==null && source.getType()==candidate.getType();
+        return left.getKey().equals(right.getKey());
     }
-
-    static @Nullable ItemStack getPickItem(@NotNull Block block, @NotNull Player player) {
-        RebarBlock rebarBlock = BlockStorage.get(block);
-        if (rebarBlock == null) {
-            return null;
-        }
-
-        ItemStack pickItem = rebarBlock.getPickItem(player);
-        if (pickItem == null) {
-            return null;
-        }
-
-        ItemStack result = pickItem.clone();
-        result.setAmount(1);
-        return result;
+    static boolean isPlacedFromItem(Block block,ItemStack item) {
+        RebarBlock value=BlockStorage.get(block);RebarItem source=RebarItem.fromStack(item);
+        return value!=null && source!=null && value.getKey().equals(source.getRebarBlock());
     }
-
-    static boolean isSameBlockType(@NotNull Block source, @NotNull Block candidate) {
-        RebarBlock sourceBlock = BlockStorage.get(source);
-        RebarBlock candidateBlock = BlockStorage.get(candidate);
-
-        if (sourceBlock == null || candidateBlock == null) {
-            return sourceBlock == null
-                    && candidateBlock == null
-                    && source.getType() == candidate.getType();
-        }
-
-        return sourceBlock.getKey().equals(candidateBlock.getKey());
-    }
-
-    static boolean isPlacedFromItem(@NotNull Block block, @NotNull ItemStack item) {
-        RebarBlock rebarBlock = BlockStorage.get(block);
-        RebarItem rebarItem = RebarItem.fromStack(item);
-        if (rebarBlock == null || rebarItem == null) {
-            return false;
-        }
-
-        NamespacedKey blockKey = rebarItem.getRebarBlock();
-        return blockKey != null && blockKey.equals(rebarBlock.getKey());
-    }
-
-    /**
-     * Attempts to remove a just-created Rebar block without drops.
-     *
-     * @return true when the matching Rebar block is no longer registered after the rollback attempt
-     */
-    static boolean rollbackPlacement(@NotNull Block block, @NotNull ItemStack item) {
-        if (!isPlacedFromItem(block, item)) {
-            return true;
-        }
-
-        BlockStorage.breakBlock(block, new BlockBreakContext.PluginBreak(block, false, true));
-        return !isPlacedFromItem(block, item);
+    static boolean rollback(Block block,Object expected) {
+        Object current=BlockStorage.get(block);
+        if (current==null) return true;
+        // Even a new block with the same key is not the instance created by this transaction.
+        if (current!=expected) return false;
+        var drops=BlockStorage.breakBlock(block,new BlockBreakContext.PluginBreak(block,false,true));
+        // A veto, exceptional provider state or custom callback drops need manual recovery,
+        // not a refund that might duplicate a stateful item or its contents.
+        return drops!=null && drops.isEmpty() && BlockStorage.get(block)==null;
     }
 }

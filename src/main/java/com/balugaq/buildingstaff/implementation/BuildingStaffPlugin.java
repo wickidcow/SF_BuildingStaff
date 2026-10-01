@@ -8,6 +8,8 @@ import com.balugaq.buildingstaff.core.managers.StaffSetup;
 import com.balugaq.buildingstaff.utils.Debug;
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import lombok.Getter;
+import net.guizhanss.guizhanlibplugin.bstats.bukkit.Metrics;
+import net.guizhanss.guizhanlibplugin.bstats.charts.SimplePie;
 import net.guizhanss.guizhanlibplugin.updater.GuizhanUpdater;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -37,12 +39,12 @@ public class BuildingStaffPlugin extends JavaPlugin implements SlimefunAddon {
 
     @Override
     public void onEnable() {
-        Debug.log("Starting BuildingStaff...");
-        this.username = "wickidcow";
-        this.repo = "SF_BuildingStaff";
+        Debug.log("Enabling BuildingStaff...");
+        this.username = "balugaq";
+        this.repo = "BuildingStaff";
         this.branch = "master";
 
-        Debug.log("Loading configuration...");
+        Debug.log("Loading config...");
         configManager = new ConfigManager(this);
         configManager.setup();
 
@@ -50,7 +52,7 @@ public class BuildingStaffPlugin extends JavaPlugin implements SlimefunAddon {
         displayManager = new DisplayManager(this);
         displayManager.setup();
 
-        Debug.log("Loading listeners...");
+        Debug.log("Loading listener manager...");
         listenerManager = new ListenerManager(this);
         listenerManager.setup();
 
@@ -59,15 +61,15 @@ public class BuildingStaffPlugin extends JavaPlugin implements SlimefunAddon {
         commandManager.setup();
 
         if (getServer().getPluginManager().isPluginEnabled("GuizhanLibPlugin")) {
-            Debug.log("Checking for automatic updates...");
+            Debug.log("Trying to update...");
             tryUpdate();
         }
 
-        Debug.log("Registering BuildingStaff items...");
+        Debug.log("Registering BuildingStaff Items...");
         staffSetup = new StaffSetup(this);
         staffSetup.setup();
 
-        Debug.log("BuildingStaff enabled successfully!");
+        Debug.log("BuildingStaff enabled!");
     }
 
     public void reload() {
@@ -83,16 +85,16 @@ public class BuildingStaffPlugin extends JavaPlugin implements SlimefunAddon {
         listenerManager.shutdown();
         commandManager.shutdown();
         configManager.shutdown();
-        Debug.log("BuildingStaff disabled.");
+        Debug.log("Disabled BuildingStaff!");
     }
 
     public void tryUpdate() {
         try {
-            if (configManager.isAutoUpdate() && getDescription().getVersion().startsWith("Build")) {
+            if (configManager.isAutoUpdate() && getPluginMeta().getVersion().startsWith("Build")) {
                 GuizhanUpdater.start(this, getFile(), username, repo, branch);
             }
         } catch (NoClassDefFoundError | NullPointerException | UnsupportedClassVersionError e) {
-            Debug.log("Automatic update failed: " + e.getMessage());
+            Debug.log("Auto-update failed: " + e.getMessage());
             Debug.log(e);
         }
     }

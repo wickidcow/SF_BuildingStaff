@@ -1,7 +1,8 @@
 package com.balugaq.buildingstaff.utils.compatibility;
 
 import com.google.common.base.Preconditions;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
@@ -20,7 +21,9 @@ import java.util.function.Consumer;
 
 @ApiStatus.Experimental
 public class CustomItemStack implements Cloneable {
-    private final ItemStack delegate;
+    private static final LegacyComponentSerializer LEGACY_AMPERSAND = LegacyComponentSerializer.builder().character('&').hexColors().build();
+    private static final LegacyComponentSerializer LEGACY_SECTION = LegacyComponentSerializer.legacySection();
+    private ItemStack delegate;
 
     public CustomItemStack(@NotNull ItemStack item) {
         this.delegate = item.clone();
@@ -43,14 +46,14 @@ public class CustomItemStack implements Cloneable {
     public CustomItemStack(@NotNull ItemStack itemStack, @Nullable String name, @NotNull String @NotNull ... lore) {
         this(itemStack, itemMeta -> {
             if (name != null) {
-                itemMeta.setDisplayName(color(name));
+                itemMeta.displayName(colorComponent(name));
             }
             if (lore.length > 0) {
-                List<String> lines = new ArrayList<>();
+                List<Component> lines = new ArrayList<>();
                 for (String line : lore) {
-                    lines.add(color(line));
+                    lines.add(colorComponent(line));
                 }
-                itemMeta.setLore(lines);
+                itemMeta.lore(lines);
             }
         });
     }
@@ -58,14 +61,14 @@ public class CustomItemStack implements Cloneable {
     public CustomItemStack(@NotNull ItemStack itemStack, Color color, @Nullable String name, String @NotNull ... lore) {
         this(itemStack, itemMeta -> {
             if (name != null) {
-                itemMeta.setDisplayName(color(name));
+                itemMeta.displayName(colorComponent(name));
             }
             if (lore.length > 0) {
-                List<String> lines = new ArrayList<>();
+                List<Component> lines = new ArrayList<>();
                 for (String line : lore) {
-                    lines.add(color(line));
+                    lines.add(colorComponent(line));
                 }
-                itemMeta.setLore(lines);
+                itemMeta.lore(lines);
             }
             if (itemMeta instanceof LeatherArmorMeta leatherArmorMeta) {
                 leatherArmorMeta.setColor(color);
@@ -98,15 +101,18 @@ public class CustomItemStack implements Cloneable {
     }
 
     public CustomItemStack(@NotNull ItemStack itemStack, @NotNull Material material) {
-        this.delegate = itemStack.clone();
-        this.delegate.setType(material);
+        this.delegate = itemStack.withType(material);
     }
 
     public static @NotNull String color(@NotNull String raw) {
-        return ChatColor.translateAlternateColorCodes('&', Preconditions.checkNotNull(raw, "raw cannot be null"));
+        return LEGACY_SECTION.serialize(colorComponent(raw));
     }
 
-    // 委托方法封装
+    public static @NotNull Component colorComponent(@NotNull String raw) {
+        return LEGACY_AMPERSAND.deserialize(Preconditions.checkNotNull(raw, "raw cannot be null"));
+    }
+
+    // Delegate method wrappers
     public ItemStack getDelegate() {
         return delegate.clone();
     }
@@ -116,7 +122,7 @@ public class CustomItemStack implements Cloneable {
     }
 
     public void setType(Material material) {
-        delegate.setType(material);
+        delegate = delegate.withType(material);
     }
 
     public int getAmount() {
@@ -168,7 +174,16 @@ public class CustomItemStack implements Cloneable {
     }
 
     public @NotNull CustomItemStack setCustomModelData(@Range(from = 0, to = Integer.MAX_VALUE) int data) {
-        return editItemMeta(meta -> meta.setCustomModelData(data == 0 ? null : data));
+        return editItemMeta(meta -> {
+            if (data == 0) {
+                meta.setCustomModelDataComponent(null);
+                return;
+            }
+
+            var component = meta.getCustomModelDataComponent();
+            component.setFloats(List.of((float) data));
+            meta.setCustomModelDataComponent(component);
+        });
     }
 
     public @NotNull CustomItemStack clone() {

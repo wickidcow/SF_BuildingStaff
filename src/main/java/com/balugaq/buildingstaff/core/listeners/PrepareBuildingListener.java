@@ -16,7 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.metamechanists.displaymodellib.models.components.ModelCuboid;
 import org.metamechanists.displaymodellib.sefilib.entity.display.DisplayGroup;
@@ -98,11 +98,13 @@ public class PrepareBuildingListener implements Listener {
         }
 
         displayGroup.getDisplays().forEach((name, display) ->
-                display.setMetadata(
-                        BuildingStaffPlugin.getInstance().getName(),
-                        new FixedMetadataValue(BuildingStaffPlugin.getInstance(), true)
-                )
+            display.getPersistentDataContainer().set(
+                com.balugaq.buildingstaff.utils.KeyUtil.DISPLAY_PROJECTION,
+                PersistentDataType.BYTE,
+                (byte) 1
+            )
         );
+
 
         UUID uuid = player.getUniqueId();
         BuildingStaffPlugin.getInstance().getDisplayManager().registerDisplayGroup(uuid, displayGroup);

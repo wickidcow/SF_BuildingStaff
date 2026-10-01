@@ -12,6 +12,8 @@ import com.balugaq.buildingstaff.implementation.items.BuildingStaff4096;
 import com.balugaq.buildingstaff.implementation.items.BuildingStaff64;
 import com.balugaq.buildingstaff.implementation.items.BuildingStaff9;
 import com.balugaq.buildingstaff.implementation.items.DisplayClearer;
+import com.balugaq.buildingstaff.utils.ItemStackUtil;
+import com.balugaq.buildingstaff.implementation.items.DisplayClearer;
 import com.balugaq.buildingstaff.utils.KeyUtil;
 import com.balugaq.buildingstaff.utils.SlimefunItemUtil;
 import com.balugaq.buildingstaff.utils.compatibility.Converter;
@@ -20,6 +22,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -68,7 +71,7 @@ public class StaffSetup implements IManager {
         ItemStack bronze = Converter.getItem(SlimefunItems.BRONZE_INGOT);
         ItemStack glass = new ItemStack(Material.GLASS);
         ItemStack diamond = new ItemStack(Material.DIAMOND);
-        ItemStack goldIngot = new ItemStack(Material.GOLD_INGOT);
+        ItemStack gold_ingot = new ItemStack(Material.GOLD_INGOT);
 
         mainGroup = new ItemGroup(KeyUtil.newKey("building_staff"), Converter.getItem(
                 Material.BLAZE_ROD,
@@ -82,10 +85,10 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BUILDING_STAFF_9",
                         new ItemStack(Material.IRON_SWORD),
-                        "&aBuilding Staff | &99 Blocks",
+                        "&aBuild Staff | &99 Blocks",
                         "&7Right-click to place blocks",
-                        "&aMaximum range: 9 blocks",
-                        "&aSelected plane may contain any block type"
+                        "&eMax Range: 9 Blocks",
+                        "&aSelected area can be formed by any block"
                 ),
                 RecipeType.ENHANCED_CRAFTING_TABLE,
                 new ItemStack[]{
@@ -102,10 +105,10 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BUILDING_STAFF_64",
                         new ItemStack(Material.GOLDEN_SWORD),
-                        "&aBuilding Staff | &664 Blocks",
+                        "&aBuild Staff | &664 Blocks",
                         "&7Right-click to place blocks",
-                        "&eMaximum range: 64 blocks",
-                        "&aSelected plane may contain any block type"
+                        "&eMax Range: 64 Blocks",
+                        "&aSelected area can be formed by any block"
                 ),
                 RecipeType.ANCIENT_ALTAR,
                 new ItemStack[]{
@@ -122,11 +125,11 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BUILDING_STAFF_4096",
                         new ItemStack(Material.DIAMOND_SWORD),
-                        "&aBuilding Staff | &e4096 Blocks",
+                        "&aBuild Staff | &e4096 Blocks",
                         "&7Right-click to place blocks",
-                        "&cMaximum range: 4096 blocks",
-                        "&aSelected plane may contain any block type",
-                        "&cAdmin use only"
+                        "&eMax Range: 4096 Blocks",
+                        "&aSelected area can be formed by any block",
+                        "&cOP only"
                 ),
                 RecipeType.NULL,
                 new ItemStack[]{}
@@ -139,10 +142,10 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BLOCK_STRICT_BUILDING_STAFF_9",
                         new ItemStack(Material.IRON_SWORD),
-                        "&aStrict Building Staff | &99 Blocks",
+                        "&aBuild Staff | &99 Blocks",
                         "&7Right-click to place blocks",
-                        "&aMaximum range: 9 blocks",
-                        "&cSelected plane must contain only one block type"
+                        "&eMax Range: 9 Blocks",
+                        "&cSelected area can be formed only by one kind of block"
                 ),
                 RecipeType.ENHANCED_CRAFTING_TABLE,
                 new ItemStack[]{
@@ -159,10 +162,10 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BLOCK_STRICT_BUILDING_STAFF_64",
                         new ItemStack(Material.GOLDEN_SWORD),
-                        "&aStrict Building Staff | &664 Blocks",
+                        "&aBuild Staff | &664 Blocks",
                         "&7Right-click to place blocks",
-                        "&eMaximum range: 64 blocks",
-                        "&cSelected plane must contain only one block type"
+                        "&eMax Range: 64 Blocks",
+                        "&cSelected area can be formed only by one kind of block"
                 ),
                 RecipeType.ENHANCED_CRAFTING_TABLE,
                 new ItemStack[]{
@@ -179,11 +182,11 @@ public class StaffSetup implements IManager {
                 new SlimefunItemStack(
                         "BLOCK_STRICT_BUILDING_STAFF_4096",
                         new ItemStack(Material.DIAMOND_SWORD),
-                        "&aStrict Building Staff | &e4096 Blocks",
+                        "&aBuild Staff | &e4096 Blocks",
                         "&7Right-click to place blocks",
-                        "&cMaximum range: 4096 blocks",
-                        "&cSelected plane must contain only one block type",
-                        "&cAdmin use only"
+                        "&eMax Range: 4096 Blocks",
+                        "&cSelected area can be formed only by one kind of block",
+                        "&cOP only"
                 ),
                 RecipeType.NULL,
                 new ItemStack[]{}
@@ -198,8 +201,8 @@ public class StaffSetup implements IManager {
                         new ItemStack(Material.IRON_SWORD),
                         "&cBreaking Staff | &99 Blocks",
                         "&7Right-click to break blocks",
-                        "&aMaximum range: 9 blocks",
-                        "&cSelected plane must contain only one block type"
+                        "&eMax Range: 9 Blocks",
+                        "&cSelected area can be formed only by one kind of block"
                 ),
                 RecipeType.ENHANCED_CRAFTING_TABLE,
                 new ItemStack[]{
@@ -218,8 +221,8 @@ public class StaffSetup implements IManager {
                         new ItemStack(Material.GOLDEN_SWORD),
                         "&cBreaking Staff | &664 Blocks",
                         "&7Right-click to break blocks",
-                        "&eMaximum range: 64 blocks",
-                        "&cSelected plane must contain only one block type"
+                        "&eMax Range: 64 Blocks",
+                        "&cSelected area can be formed only by one kind of block"
                 ),
                 RecipeType.ENHANCED_CRAFTING_TABLE,
                 new ItemStack[]{
@@ -238,9 +241,9 @@ public class StaffSetup implements IManager {
                         new ItemStack(Material.DIAMOND_SWORD),
                         "&cBreaking Staff | &e4096 Blocks",
                         "&7Right-click to break blocks",
-                        "&cMaximum range: 4096 blocks",
-                        "&cSelected plane must contain only one block type",
-                        "&cAdmin use only"
+                        "&eMax Range: 4096 Blocks",
+                        "&cSelected area can be formed only by one kind of block",
+                        "&cOP only"
                 ),
                 RecipeType.NULL,
                 new ItemStack[]{}
@@ -254,13 +257,13 @@ public class StaffSetup implements IManager {
                         "BUILDING_STAFF_DISPLAY_CLEARER",
                         Material.CLAY_BALL,
                         "&eDisplay Clearer",
-                        "&eClears holographic entities left by Building Staff"
+                        "&eClears leftover hologram entities from Building Staff"
                 ),
                 RecipeType.ENHANCED_CRAFTING_TABLE,
                 new ItemStack[] {
-                        glass, glass, goldIngot,
+                        glass, glass, gold_ingot,
                         diamond, diamond, glass,
-                        glass, glass, goldIngot
+                        glass, glass, gold_ingot
                 }
         );
 

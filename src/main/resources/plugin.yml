@@ -2,10 +2,10 @@ name: BuildingStaff
 main: com.balugaq.buildingstaff.implementation.BuildingStaffPlugin
 depend: [ Slimefun ]
 softdepend: [ Rebar, Pylon ]
-authors: [ balugaq, wickidcow ]
-website: https://github.com/wickidcow/SF_BuildingStaff
+authors: [ balugaq ]
+website: https://github.com/balugaq/BuildingStaff
 version: ${project.version}
-api-version: '1.21'
+api-version: 1.20
 commands:
   buildingstaff:
     aliases: bs

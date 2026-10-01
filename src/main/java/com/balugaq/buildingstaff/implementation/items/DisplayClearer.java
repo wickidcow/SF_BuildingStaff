@@ -12,10 +12,8 @@ import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.List;
 
 /**
  * @author balugaq
@@ -36,8 +34,7 @@ public class DisplayClearer extends SlimefunItem {
 
             Player player = event.getPlayer();
             player.getWorld().getNearbyEntitiesByType(Display.class, player.getLocation(), 8, 8, 8).forEach(display -> {
-                List<MetadataValue> metadata = display.getMetadata(BuildingStaffPlugin.getInstance().getName());
-                if (!metadata.isEmpty() && metadata.get(0).asBoolean()) {
+                if (display.getPersistentDataContainer().has(KeyUtil.DISPLAY_PROJECTION, PersistentDataType.BYTE)) {
                     display.remove();
                 }
             });
